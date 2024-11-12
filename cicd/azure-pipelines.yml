@@ -1,0 +1,29 @@
+# azure-pipelines.yml
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.x'
+
+- script: |
+    python -m pip install --upgrade pip
+    pip install -r model-training/requirements.txt
+  displayName: 'Instalar dependências'
+
+- script: |
+    python model-training/train_model.py --data_path data/processed_data.csv
+  displayName: 'Treinar modelo'
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(System.DefaultWorkingDirectory)/model-training/model.pkl'
+    artifactName: 'modelo'
+    publishLocation: 'Pipeline'
+  displayName: 'Publicar modelo'
